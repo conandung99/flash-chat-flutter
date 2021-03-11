@@ -19,6 +19,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
+      upperBound: 100.0, // Set the upper value, default [0.0 , 1.0];
     );
 
     controller.forward();
@@ -33,7 +34,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     controller.forward();
     return Scaffold(
       // backgroundColor: Colors.white,
-      backgroundColor: Colors.white.withOpacity(controller.value),
+      backgroundColor: Colors.white.withOpacity(
+          controller.value / 100), // Notice the when the value > 1.0
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -46,11 +48,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   tag: 'logo',
                   child: Container(
                     child: Image.asset('images/logo.png'),
-                    height: 60.0,
+                    height: /*60.0*/ controller.value,
                   ),
                 ),
                 Text(
-                  'Flash Chat',
+                  // 'Flash Chat',
+                  '${controller.value.toInt()}%',
                   style: TextStyle(
                     fontSize: 45.0,
                     fontWeight: FontWeight.w900,
