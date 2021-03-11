@@ -23,7 +23,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       // upperBound: 100.0, // Set the upper value, default [0.0 , 1.0];
     );
 
-    animation = CurvedAnimation(parent: controller, curve: Curves.decelerate);
+    // animation = CurvedAnimation(parent: controller, curve: Curves.decelerate);
+    animation = ColorTween(begin: Colors.blueGrey, end: Colors.white)
+        .animate(controller);
 
     controller.forward();
     // controller.reverse(from: 1.0);
@@ -33,13 +35,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       print(animation.value);
     });
 
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        controller.reverse(from: 1.0);
-      } else if (status == AnimationStatus.dismissed) {
-        controller.forward();
-      }
-    });
+    // animation.addStatusListener((status) {
+    //   if (status == AnimationStatus.completed) {
+    //     controller.reverse(from: 1.0);
+    //   } else if (status == AnimationStatus.dismissed) {
+    //     controller.forward();
+    //   }
+    // });
   }
 
   @override
@@ -51,7 +53,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
+      backgroundColor: animation.value,
       // backgroundColor: Colors.white
       //     .withOpacity(controller.value), // Notice the when the value > 1.0
       body: Padding(
@@ -66,8 +69,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   tag: 'logo',
                   child: Container(
                     child: Image.asset('images/logo.png'),
-                    // height: /*60.0*/ controller.value,
-                    height: animation.value * 100,
+                    height: 60.0 /*controller.value*/,
+                    // height: animation.value * 100,
                   ),
                 ),
                 Text(
