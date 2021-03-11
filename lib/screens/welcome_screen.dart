@@ -12,30 +12,48 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   AnimationController controller;
+  Animation animation;
 
   @override
   void initState() {
     super.initState();
     controller = AnimationController(
+      duration: Duration(seconds: 2),
       vsync: this,
-      duration: Duration(seconds: 1),
-      upperBound: 100.0, // Set the upper value, default [0.0 , 1.0];
+      // upperBound: 100.0, // Set the upper value, default [0.0 , 1.0];
     );
 
+    animation = CurvedAnimation(parent: controller, curve: Curves.decelerate);
+
     controller.forward();
+    // controller.reverse(from: 1.0);
     controller.addListener(() {
       setState(() {});
-      print(controller.value);
+      // print(controller.value);
+      print(animation.value);
+    });
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        controller.reverse(from: 1.0);
+      } else if (status == AnimationStatus.dismissed) {
+        controller.forward();
+      }
     });
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    controller.forward();
     return Scaffold(
-      // backgroundColor: Colors.white,
-      backgroundColor: Colors.white.withOpacity(
-          controller.value / 100), // Notice the when the value > 1.0
+      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white
+      //     .withOpacity(controller.value), // Notice the when the value > 1.0
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -48,12 +66,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   tag: 'logo',
                   child: Container(
                     child: Image.asset('images/logo.png'),
-                    height: /*60.0*/ controller.value,
+                    // height: /*60.0*/ controller.value,
+                    height: animation.value * 100,
                   ),
                 ),
                 Text(
-                  // 'Flash Chat',
-                  '${controller.value.toInt()}%',
+                  'Flash Chat',
+                  // '${controller.value.toInt()}%',
                   style: TextStyle(
                     fontSize: 45.0,
                     fontWeight: FontWeight.w900,
