@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flash_chat/components/button_padding.dart';
 import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -10,7 +13,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  FirebaseAuth _auth;
   String email, password;
+
+  Future<void> initializeApp() async {
+    try {
+      final FirebaseApp firebaseApp = await Firebase.initializeApp();
+      if (firebaseApp != null) {
+        print('firebaseApp: ${firebaseApp.name}');
+        _auth = FirebaseAuth.instance;
+      }
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeApp();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +83,16 @@ class _LoginScreenState extends State<LoginScreen> {
             ButtonPadding(
               color: Colors.blueAccent,
               text: 'Login',
-              function: () {
-                //implement Login function
+              function: () async {
+                try {
+                  final userCredential = await _auth.signInWithEmailAndPassword(
+                      email: email, password: password);
+                  if (userCredential != null) {
+                    Navigator.pushNamed(context, ChatScreen.id);
+                  }
+                } on Exception catch (e) {
+                  print(e);
+                }
               },
             ),
           ],
