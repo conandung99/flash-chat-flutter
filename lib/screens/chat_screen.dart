@@ -25,6 +25,15 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Future<void> messageStream() async {
+    var snapshot = _firestore.collection('messages').snapshots();
+    await snapshot.forEach((element) {
+      for (var msg in element.docs) {
+        print(msg.data());
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +57,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 // _auth.signOut();
                 // Navigator.pop(context);
 
-                getMessageNegative();
+                // getMessageNegative();
+                messageStream();
               }),
         ],
         title: Text('⚡️Chat'),
