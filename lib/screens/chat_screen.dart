@@ -16,6 +16,15 @@ class _ChatScreenState extends State<ChatScreen> {
   User loggedInUser;
   String messageText;
 
+  Future<void> getMessageNegative() async {
+    var messages =
+        await _firestore.collection('messages').get().then((querySnapshot) {
+      for (var msg in querySnapshot.docs) {
+        print(msg.data());
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +45,10 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: Icon(Icons.close),
               onPressed: () {
                 //Implement logout functionality
-                _auth.signOut();
-                Navigator.pop(context);
+                // _auth.signOut();
+                // Navigator.pop(context);
+
+                getMessageNegative();
               }),
         ],
         title: Text('⚡️Chat'),
