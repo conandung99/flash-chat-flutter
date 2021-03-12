@@ -1,6 +1,9 @@
 import 'package:flash_chat/components/button_padding.dart';
 import 'package:flash_chat/constants.dart';
+import 'package:flash_chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = '/registration_screen';
@@ -10,7 +13,26 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  FirebaseAuth _auth;
   String email, password;
+
+  Future<void> initializeApp() async {
+    try {
+      final FirebaseApp firebaseApp = await Firebase.initializeApp();
+      if (firebaseApp != null) {
+        print('firebaseApp: ${firebaseApp.name}');
+        _auth = FirebaseAuth.instance;
+      }
+    } on Exception catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeApp();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,9 +82,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ),
             ButtonPadding(
               color: Colors.blueAccent,
-              function: () {
-                print(email);
-                print(password);
+              function: () async {
+                try {
+                  // print(email);
+                  // print(password);
+                  final user = await _auth.createUserWithEmailAndPassword(
+                      email: email, password: password);
+                  if (user != null) {
+                    Navigator.pushNamed(context, ChatScreen.id);
+                  }
+                } catch (e) {
+                  print(e);
+                }
               },
               text: 'Register',
             ),
