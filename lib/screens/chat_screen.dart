@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+User loggedInUser = _auth.currentUser;
 
 class ChatScreen extends StatefulWidget {
   static const String id = '/chat_screen';
@@ -13,38 +15,16 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController textEditingController = TextEditingController();
-
-  User loggedInUser;
   String messageText;
 
-  Future<void> getMessageNegative() async {
-    var messages =
-        await _firestore.collection('messages').get().then((querySnapshot) {
-      for (var msg in querySnapshot.docs) {
-        print(msg.data());
-      }
-    });
-  }
-
   Future<void> messageStream() async {
-    var snapshot = _firestore.collection('messages').snapshots();
+    var snapshot = _fireStore.collection('messages').snapshots();
     await snapshot.forEach((element) {
       for (var msg in element.docs) {
         print(msg.data());
       }
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final User user = _auth.currentUser;
-    if (user != null) {
-      loggedInUser = user;
-      print(loggedInUser.email);
-    }
   }
 
   @override
@@ -57,11 +37,8 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: Icon(Icons.close),
               onPressed: () {
                 //Implement logout functionality
-                // _auth.signOut();
-                // Navigator.pop(context);
-
-                // getMessageNegative();
-                messageStream();
+                _auth.signOut();
+                Navigator.pop(context);
               }),
         ],
         title: Text('⚡️Chat'),
@@ -92,7 +69,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () {
                       //Implement send functionality.
                       textEditingController.clear();
-                      _firestore.collection('messages').add({
+                      _fireStore.collection('messages').add({
                         'text': messageText,
                         'sender': loggedInUser.email,
                       });
@@ -116,7 +93,7 @@ class MessageStream extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').snapshots(),
+      stream: _fireStore.collection('messages').snapshots(),
       builder: (context, asyncSnapShot) {
         if (!asyncSnapShot.hasData) {
           /// show circle indicator
@@ -135,6 +112,7 @@ class MessageStream extends StatelessWidget {
           textWidget.add(MessageBubble(
             text: msgText,
             sender: sender,
+            isMe: loggedInUser.email == sender,
           ));
         }
         return Expanded(
@@ -149,15 +127,17 @@ class MessageStream extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.sender, this.text});
+  MessageBubble({this.sender, this.text, this.isMe});
   final String text, sender;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             sender,
@@ -165,16 +145,21 @@ class MessageBubble extends StatelessWidget {
           ),
           Material(
             elevation: 5.0,
-            color: Colors.lightBlueAccent,
-            borderRadius: BorderRadius.circular(30.0),
+            color: isMe ? Colors.lightBlueAccent : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: isMe ? Radius.circular(30.0) : Radius.zero,
+              bottomLeft: Radius.circular(30.0),
+              bottomRight: Radius.circular(30.0),
+              topRight: isMe ? Radius.zero : Radius.circular(30.0),
+            ),
             child: Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
               child: Text(
                 text,
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 30.0,
+                  color: isMe ? Colors.white : Colors.black54,
+                  fontSize: 25.0,
                 ),
               ),
             ),
