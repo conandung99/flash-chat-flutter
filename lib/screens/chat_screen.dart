@@ -18,15 +18,6 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController textEditingController = TextEditingController();
   String messageText;
 
-  Future<void> messageStream() async {
-    var snapshot = _fireStore.collection('messages').snapshots();
-    await snapshot.forEach((element) {
-      for (var msg in element.docs) {
-        print(msg.data());
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +108,7 @@ class MessageStream extends StatelessWidget {
         }
         return Expanded(
           child: ListView(
+            reverse: true,
             padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
             children: textWidget,
           ),
@@ -158,7 +150,7 @@ class MessageBubble extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  color: isMe ? Colors.white : Colors.black54,
+                  color: isMe ? Colors.white : Colors.black87,
                   fontSize: 25.0,
                 ),
               ),
